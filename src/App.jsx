@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, createContext } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser, clearUser } from './store/userSlice';
 
 // Create authentication context
 export const AuthContext = createContext(null);
-import { useDispatch, useSelector } from 'react-redux';
-import { setUser, clearUser } from './store/userSlice';
 import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
 import Collections from './pages/Collections';
@@ -32,7 +32,7 @@ const Header = ({ toggleDarkMode, darkMode }) => {
   // Get user data from Redux
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const { logout } = useContext(AuthContext);
+  const { logout } = useState(null);
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileRef = useRef(null);
@@ -363,7 +363,7 @@ const Footer = () => {
   );
 };
 
-function App() {
+export default function App() {
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -527,5 +527,3 @@ function App() {
       </div>
     </AuthContext.Provider>
   );
-
-export default App;
