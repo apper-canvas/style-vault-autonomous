@@ -358,7 +358,6 @@ const Footer = () => {
           <p>&copy; {new Date().getFullYear()} StyleVault. All rights reserved.</p>
           
         </div>
-        </div>
       </div>
     </footer>
   );
@@ -530,4 +529,3 @@ function App() {
   );
 
 export default App;
-
