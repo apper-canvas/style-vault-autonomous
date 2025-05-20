@@ -97,7 +97,9 @@ const Header = ({ toggleDarkMode, darkMode }) => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full"
             >
-              {isMobileMenuOpen ? getIcon('x')({size: 24}) : getIcon('menu')({size: 24})}
+              {isMobileMenuOpen 
+                ? <>{getIcon('x')({ size: 24 })}</>
+                : <>{getIcon('menu')({ size: 24 })}</>}
             </button>
           </div>
           </div>
