@@ -382,9 +382,9 @@ const MainFeature = ({ cart = [], setCart = () => {}, addToCart = () => {} }) =>
           <span className="text-sm">Secure Payment</span>
         </div>
         <div className="flex items-center space-x-2">
-          <img src="https://placehold.co/100x60/F3F4F6/5073b8?text=PayPal" alt="PayPal" className="h-6" onError={(e) => { e.target.src = "https://placehold.co/100x60/F3F4F6/5073b8?text=PayPal"; }} />
-          <img src="https://placehold.co/100x60/F3F4F6/1a1f71?text=Visa" alt="Visa" className="h-6" onError={(e) => { e.target.src = "https://placehold.co/100x60/F3F4F6/1a1f71?text=Visa"; }} />
-          <img src="https://placehold.co/100x60/F3F4F6/eb001b?text=MasterCard" alt="MasterCard" className="h-6" onError={(e) => { e.target.src = "https://placehold.co/100x60/F3F4F6/eb001b?text=MasterCard"; }} />
+          <img src="https://placehold.co/100x60/F3F4F6/5073b8?text=PayPal" alt="PayPal" className="h-6" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x60/F3F4F6/5073b8?text=PayPal"; }} />
+          <img src="https://placehold.co/100x60/F3F4F6/1a1f71?text=Visa" alt="Visa" className="h-6" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x60/F3F4F6/1a1f71?text=Visa"; }} />
+          <img src="https://placehold.co/100x60/F3F4F6/eb001b?text=MasterCard" alt="MasterCard" className="h-6" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/100x60/F3F4F6/eb001b?text=MasterCard"; }} />
         </div>
       </div>
       

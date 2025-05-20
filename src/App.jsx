@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
 import Collections from './pages/Collections';
 import WomenProducts from './pages/WomenProducts';
 import NotFound from './pages/NotFound';
+import SearchResults from './pages/SearchResults';
+import SearchBar from './components/SearchBar';
+import { SearchProvider } from './context/SearchContext';
 
 // Header component
 const Header = ({ toggleDarkMode, darkMode }) => {
+  const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [cart, setCart] = useState([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   
   // Get icons as components
   const ShoppingBagIcon = getIcon('shopping-bag');
   const MoonIcon = getIcon('moon');
   const SunIcon = getIcon('sun');
-  const MenuIcon = getIcon('menu');
-  const XIcon = getIcon('x');
-  const UserIcon = getIcon('user');
-  const HeartIcon = getIcon('heart');
   const SearchIcon = getIcon('search');
   
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -47,11 +48,23 @@ const Header = ({ toggleDarkMode, darkMode }) => {
           </nav>
           
           {/* Actions */}
-          <div className="flex items-center space-x-4">
-            <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
+          <div className="flex items-center">
+            {/* Search for desktop */}
+            <div className="hidden md:block mr-4 w-64">
+              <SearchBar />
+            </div>
+            
+            {/* Search icon for mobile - expands search on click */}
+            <button 
+              className="md:hidden p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full"
+              onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+            >
               <SearchIcon size={20} />
             </button>
-            
+
+            {/* Other action buttons with proper spacing */}
+            <div className="flex items-center space-x-4">
+            {getIcon('user')({size: 20, className: "text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light"})}
             <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
               <UserIcon size={20} />
             </button>
@@ -59,7 +72,7 @@ const Header = ({ toggleDarkMode, darkMode }) => {
             <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
               <HeartIcon size={20} />
             </button>
-            
+
             <button 
               onClick={toggleDarkMode} 
               className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full"
@@ -83,8 +96,9 @@ const Header = ({ toggleDarkMode, darkMode }) => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full"
             >
-              {isMobileMenuOpen ? <XIcon size={24} /> : <MenuIcon size={24} />}
+              {isMobileMenuOpen ? getIcon('x')({size: 24}) : getIcon('menu')({size: 24})}
             </button>
+          </div>
           </div>
         </div>
         
@@ -98,6 +112,15 @@ const Header = ({ toggleDarkMode, darkMode }) => {
               <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">New Arrivals</a>
               <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Sale</a>
             </nav>
+          </div>
+        )}
+        
+        {/* Mobile expanded search */}
+        {isSearchExpanded && (
+          <div className="md:hidden pt-3 pb-2">
+            <SearchBar 
+              onSearchComplete={() => setIsSearchExpanded(false)}
+            />
           </div>
         )}
       </div>
@@ -208,13 +231,15 @@ function App() {
   
   return (
     <div className="flex flex-col min-h-screen">
-      <Header toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
-      
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/collections" element={<Collections />} />
-          <Route path="/women" element={<WomenProducts />} />
+      <SearchProvider>
+        <Header toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+        
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/women" element={<WomenProducts />} />
+            <Route path="/search" element={<SearchResults />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -233,6 +258,7 @@ function App() {
         pauseOnHover
         theme={darkMode ? "dark" : "light"}
       />
+      </SearchProvider>
     </div>
   );
 }
