@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
@@ -209,6 +210,8 @@ const ProductCard = ({ product, addToCart }) => {
 
 // Hero Section component
 const HeroSection = () => {
+  const navigate = useNavigate();
+  
   return (
     <section className="relative">
       <div className="h-[70vh] overflow-hidden">
@@ -243,7 +246,12 @@ const HeroSection = () => {
                 transition={{ duration: 0.5, delay: 0.6 }}
               >
                 <a href="#featured" className="btn btn-primary px-6 py-3">Shop Now</a>
-                <a href="#collection" className="btn btn-outline border-white text-white hover:bg-white/20 hover:text-white px-6 py-3">View Collection</a>
+                <button 
+                  onClick={() => navigate('/collections')} 
+                  className="btn btn-outline border-white text-white hover:bg-white/20 hover:text-white px-6 py-3"
+                >
+                  View Collection
+                </button>
               </motion.div>
             </div>
           </div>

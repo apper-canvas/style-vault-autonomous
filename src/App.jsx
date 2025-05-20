@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
+import Collections from './pages/Collections';
 import NotFound from './pages/NotFound';
 
 // Header component
@@ -211,6 +212,7 @@ function App() {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/collections" element={<Collections />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
