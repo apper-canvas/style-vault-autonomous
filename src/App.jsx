@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { getIcon } from './utils/iconUtils';
@@ -18,6 +18,8 @@ const Header = ({ toggleDarkMode, darkMode }) => {
   const [cart, setCart] = useState([]);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileRef = useRef(null);
   // Get icons as components
   const ShoppingBagIcon = getIcon('shopping-bag');
   const UserIcon = getIcon('user');
@@ -27,8 +29,23 @@ const Header = ({ toggleDarkMode, darkMode }) => {
   const XIcon = getIcon('x');
   const MenuIcon = getIcon('menu');
   const HeartIcon = getIcon('heart');
+  const SettingsIcon = getIcon('settings');
+  const LogOutIcon = getIcon('log-out');
+  const PhoneIcon = getIcon('phone');
   
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileRef]);
+  
   
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-800">
@@ -79,17 +96,50 @@ const Header = ({ toggleDarkMode, darkMode }) => {
 
             {/* Other action buttons with proper spacing */}
             <div className="flex items-center space-x-4">
+              <div className="relative" ref={profileRef}>
+                <button 
+                  className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full relative"
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                >
+                  <UserIcon size={20} />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-primary to-secondary rounded-full border border-white dark:border-surface-800"></div>
+                </button>
+                
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-surface-800 rounded-lg shadow-lg py-1 z-50 border border-surface-200 dark:border-surface-700">
+                    <div className="px-4 py-2 border-b border-surface-200 dark:border-surface-700">
+                      <p className="text-sm font-medium text-surface-900 dark:text-white">My Account</p>
+                      <p className="text-xs text-surface-500 dark:text-surface-400">user@example.com</p>
+                    </div>
+                    <a href="#" className="flex items-center px-4 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700">
+                      <SettingsIcon size={16} className="mr-2" />
+                      Settings
+                    </a>
+                    <a href="#" className="flex items-center px-4 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700">
+                      <PhoneIcon size={16} className="mr-2" />
+                      Contact
+                    </a>
+                    <div className="border-t border-surface-200 dark:border-surface-700 my-1"></div>
+                    <button 
+                      className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-700"
+                      onClick={() => {
+                        // Handle logout logic here
+                        setIsProfileMenuOpen(false);
+                        // For example: authService.logout();
+                        // navigate('/login');
+                      }}
+                    >
+                      <LogOutIcon size={16} className="mr-2" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+              
               <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
-                <UserIcon size={20} />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-primary to-secondary rounded-full border border-white dark:border-surface-800"></div>
+                <HeartIcon size={20} />
               </button>
               
-              
-              
-            <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
-              <HeartIcon size={20} />
-            </button>
-
             <button 
               onClick={toggleDarkMode} 
               className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full"
