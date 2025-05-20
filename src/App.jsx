@@ -24,6 +24,8 @@ const Header = ({ toggleDarkMode, darkMode }) => {
   const MoonIcon = getIcon('moon');
   const SunIcon = getIcon('sun');
   const SearchIcon = getIcon('search');
+  const XIcon = getIcon('x');
+  const MenuIcon = getIcon('menu');
   const HeartIcon = getIcon('heart');
   
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -67,9 +69,9 @@ const Header = ({ toggleDarkMode, darkMode }) => {
             {/* Other action buttons with proper spacing */}
             <div className="flex items-center space-x-4">
               <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
-              <UserIcon size={20} />
-            </button>
-            
+                <UserIcon size={20} />
+              </button>
+              
             <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
               <HeartIcon size={20} />
             </button>
@@ -98,8 +100,8 @@ const Header = ({ toggleDarkMode, darkMode }) => {
               className="md:hidden p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full"
             >
               {isMobileMenuOpen ? (
-                <>{getIcon('x')({ size: 24 })}</>
-              ) : <>{getIcon('menu')({ size: 24 })}</>}
+                <XIcon size={24} />
+              ) : <MenuIcon size={24} />}
             </button>
           </div>
           </div>
