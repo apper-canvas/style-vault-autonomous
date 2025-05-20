@@ -20,9 +20,11 @@ const Header = ({ toggleDarkMode, darkMode }) => {
   
   // Get icons as components
   const ShoppingBagIcon = getIcon('shopping-bag');
+  const UserIcon = getIcon('user');
   const MoonIcon = getIcon('moon');
   const SunIcon = getIcon('sun');
   const SearchIcon = getIcon('search');
+  const HeartIcon = getIcon('heart');
   
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
   
@@ -64,7 +66,7 @@ const Header = ({ toggleDarkMode, darkMode }) => {
 
             {/* Other action buttons with proper spacing */}
             <div className="flex items-center space-x-4">
-            {getIcon('user')({size: 20, className: "text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light"})}
+            <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
             <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
               <UserIcon size={20} />
             </button>
