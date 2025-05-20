@@ -883,6 +883,7 @@ const MainFeature = ({ cart = [], setCart = () => {}, addToCart = () => {} }) =>
                       onClick={goToNextStep}
                       className="btn btn-primary w-full"
                     >
+                      <ShoppingBagIcon size={18} className="mr-2" />
                       Proceed to Checkout
                     </button>
                   ) : checkoutStep > 1 && (
