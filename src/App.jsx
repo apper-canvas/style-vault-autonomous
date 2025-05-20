@@ -35,11 +35,22 @@ const Header = ({ toggleDarkMode, darkMode }) => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="/" className="text-2xl font-bold text-primary flex items-center gap-2">
-            <span className="text-3xl">
-              <ShoppingBagIcon size={28} className="text-primary" />
+          <a href="/" className="text-2xl font-bold flex items-center gap-2">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 100 100" 
+              width="40" 
+              height="40" 
+              className="text-primary"
+            >
+              <rect width="100" height="100" rx="20" fill="currentColor" fillOpacity="0.1" />
+              <path d="M35,30 C35,30 40,30 45,30 C50,30 55,35 55,40 C55,45 50,50 45,50 L35,50 Z" fill="currentColor" />
+              <path d="M35,50 L45,50 C50,50 55,55 55,60 C55,65 50,70 45,70 L35,70 Z" fill="currentColor" />
+              <path d="M60,30 L60,70 L65,70 C70,70 75,65 75,60 L75,40 C75,35 70,30 65,30 Z" fill="currentColor" />
+            </svg>
+            <span className="text-surface-800 dark:text-surface-100">
+              StyleVault
             </span>
-            <span>StyleVault</span>
           </a>
           
           {/* Desktop Navigation */}
@@ -148,7 +159,20 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">StyleVault</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 100 100" 
+                width="32" 
+                height="32" 
+                className="text-primary"
+              >
+                <path d="M35,30 C35,30 40,30 45,30 C50,30 55,35 55,40 C55,45 50,50 45,50 L35,50 Z" fill="currentColor" />
+                <path d="M35,50 L45,50 C50,50 55,55 55,60 C55,65 50,70 45,70 L35,70 Z" fill="currentColor" />
+                <path d="M60,30 L60,70 L65,70 C70,70 75,65 75,60 L75,40 C75,35 70,30 65,30 Z" fill="currentColor" />
+              </svg>
+              <h3 className="text-xl font-bold">StyleVault</h3>
+            </div>
             <p className="text-surface-300 mb-4">Your destination for premium fashion and style.</p>
             <div className="flex space-x-4">
               <a href="#" className="text-surface-300 hover:text-white transition-colors">
