@@ -155,6 +155,7 @@ const ProductCard = ({ product, addToCart }) => {
           src={product.image} 
           alt={product.name} 
           className="w-full h-64 object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          onError={(e) => { e.target.src = `https://placehold.co/800x600/F3F4F6/6c757d?text=${encodeURIComponent(product.name)}`; }}
         />
         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <div className="flex space-x-2">
@@ -218,6 +219,7 @@ const HeroSection = () => {
         <img 
           src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80" 
           alt="Fashion hero" 
+          onError={(e) => { e.target.src = "https://placehold.co/2000x1200/8A2BE2/FFFFFF?text=Summer+Collection"; }}
           className="w-full h-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center">
@@ -302,6 +304,7 @@ const CategorySection = () => {
                 src={category.image} 
                 alt={category.name} 
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => { e.target.src = `https://placehold.co/800x1000/F3F4F6/6c757d?text=${encodeURIComponent(category.name)}`; }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex items-end p-6">
                 <div className="w-full">

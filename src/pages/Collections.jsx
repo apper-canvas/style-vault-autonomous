@@ -63,6 +63,7 @@ const CollectionCard = ({ collection }) => {
           src={collection.image} 
           alt={collection.name} 
           className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+          onError={(e) => { e.target.src = `https://placehold.co/800x600/F3F4F6/6c757d?text=${encodeURIComponent(collection.name)}`; }}
         />
         <div className="absolute top-4 right-4 bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm text-surface-800 dark:text-surface-100 text-sm font-medium px-3 py-1 rounded-full">
           {collection.count} Items

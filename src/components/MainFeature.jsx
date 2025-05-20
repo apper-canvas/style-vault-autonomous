@@ -382,9 +382,9 @@ const MainFeature = ({ cart = [], setCart = () => {}, addToCart = () => {} }) =>
           <span className="text-sm">Secure Payment</span>
         </div>
         <div className="flex items-center space-x-2">
-          <img src="https://cdn.pixabay.com/photo/2015/05/26/09/37/paypal-784404_1280.png" alt="PayPal" className="h-6" />
-          <img src="https://pixabay.com/illustrations/blue-credit-card-visa-master-card-1672639/" alt="Visa" className="h-6" />
-          <img src="https://cdn.pixabay.com/photo/2015/05/26/09/37/paypal-784404_1280.png" alt="MasterCard" className="h-6" />
+          <img src="https://placehold.co/100x60/F3F4F6/5073b8?text=PayPal" alt="PayPal" className="h-6" onError={(e) => { e.target.src = "https://placehold.co/100x60/F3F4F6/5073b8?text=PayPal"; }} />
+          <img src="https://placehold.co/100x60/F3F4F6/1a1f71?text=Visa" alt="Visa" className="h-6" onError={(e) => { e.target.src = "https://placehold.co/100x60/F3F4F6/1a1f71?text=Visa"; }} />
+          <img src="https://placehold.co/100x60/F3F4F6/eb001b?text=MasterCard" alt="MasterCard" className="h-6" onError={(e) => { e.target.src = "https://placehold.co/100x60/F3F4F6/eb001b?text=MasterCard"; }} />
         </div>
       </div>
       
@@ -762,6 +762,7 @@ const MainFeature = ({ cart = [], setCart = () => {}, addToCart = () => {} }) =>
                                 src={item.image} 
                                 alt={item.name} 
                                 className="w-full h-full object-cover"
+                               onError={(e) => { e.target.src = `https://placehold.co/400x400/F3F4F6/6c757d?text=${encodeURIComponent(item.name)}`; }}
                               />
                             </div>
                             <div className="ml-4 flex-grow">
@@ -842,6 +843,7 @@ const MainFeature = ({ cart = [], setCart = () => {}, addToCart = () => {} }) =>
                                 src={product.image} 
                                 alt={product.name} 
                                 className="w-full aspect-square object-cover"
+                                onError={(e) => { e.target.src = `https://placehold.co/400x400/F3F4F6/6c757d?text=${encodeURIComponent(product.name)}`; }}
                               />
                               <div className="p-2">
                                 <h4 className="text-sm font-medium line-clamp-1">{product.name}</h4>
