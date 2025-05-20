@@ -18,30 +18,36 @@ export const SearchProvider = ({ children }) => {
       setSearchResults([]);
       return;
 
+    }
+    
+    setIsSearching(true);
+    
     // Use the product service to search
     searchProducts(query)
-      .then(results => {
-      
-      const results = initialProducts.filter(product => {
+      .then(apiResults => {
+        // Process the search results
+        const normalizedQuery = query.toLowerCase();
+        
+        const processedResults = apiResults.filter(product => {
+          const nameMatch = product.Name.toLowerCase().includes(normalizedQuery);
+          const descriptionMatch = product.description && product.description.toLowerCase().includes(normalizedQuery);
+          const categoryMatch = product.category && product.category.toLowerCase().includes(normalizedQuery);
+          const tagsMatch = product.Tags && product.Tags.some(tag => 
+            tag.toLowerCase().includes(normalizedQuery)
+          );
+          
+          return nameMatch || descriptionMatch || categoryMatch || tagsMatch;
+        });
+        
+        setSearchResults(processedResults);
+        setIsSearching(false);
       })
       .catch(error => {
         console.error('Search error:', error);
         toast.error('Search failed. Please try again.');
         setIsSearching(false);
       });
-        const descriptionMatch = product.description.toLowerCase().includes(normalizedQuery);
-        const categoryMatch = product.category.toLowerCase().includes(normalizedQuery);
-        const subcategoryMatch = product.subcategory.toLowerCase().includes(normalizedQuery);
-        const tagsMatch = product.tags && product.tags.some(tag => 
-          tag.toLowerCase().includes(normalizedQuery)
-        );
-        
-        return nameMatch || descriptionMatch || categoryMatch || subcategoryMatch || tagsMatch;
-      });
-      
-      setSearchResults(results);
       setIsSearching(false);
-    }, 300);
   }, []);
   
   // Debounced search
