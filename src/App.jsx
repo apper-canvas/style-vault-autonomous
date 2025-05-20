@@ -527,3 +527,5 @@ export default function App() {
       </div>
     </AuthContext.Provider>
   );
+}
+  );
