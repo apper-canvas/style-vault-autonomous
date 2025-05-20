@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, createContext } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+
+// Create authentication context
+export const AuthContext = createContext(null);
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser, clearUser } from './store/userSlice';
 import { getIcon } from './utils/iconUtils';
@@ -350,11 +353,11 @@ const Footer = () => {
               <button type="submit" className="btn btn-primary">Subscribe</button>
             </form>
           </div>
-                  id="newsletter-email"
         </div>
-                  placeholder="Your email address"
         <div className="border-t border-surface-800 mt-10 pt-6 text-center text-surface-400 text-sm">
           <p>&copy; {new Date().getFullYear()} StyleVault. All rights reserved.</p>
+          
+        </div>
         </div>
       </div>
     </footer>
@@ -363,46 +366,22 @@ const Footer = () => {
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
     // Check for user preference
     const isDark = localStorage.getItem('darkMode') === 'true' || 
                   (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     
-// Create authentication context
-export const AuthContext = createContext(null);
-
     if (isDark) {
       document.documentElement.classList.add('dark');
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+      setDarkMode(true);
     }
   }, []);
   
-  const toggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
-    }
-  };
-  
-  return (
-    <div className="flex flex-col min-h-screen">
-      <SearchProvider>
-        <Header toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
-        
-        <main className="flex-grow">
-          <Routes>
-  // Initialize authentication
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Initialize ApperUI for authentication
+  // Initialize ApperUI for authentication 
   useEffect(() => {
     const { ApperClient, ApperUI } = window.ApperSDK;
     const client = new ApperClient({
@@ -487,7 +466,19 @@ export const AuthContext = createContext(null);
       }
     }
   };
-
+  
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
+    }
+  };
   // Don't render routes until initialization is complete
   if (!isInitialized) {
     return <div className="flex items-center justify-center min-h-screen">
@@ -528,7 +519,15 @@ export const AuthContext = createContext(null);
             closeOnClick
             rtl={false}
             pauseOnFocusLoss
-}
+            draggable
+            pauseOnHover
+            theme={darkMode ? "dark" : "light"}
+          />
+          
+        </SearchProvider>
+      </div>
+    </AuthContext.Provider>
+  );
 
 export default App;
-    </AuthContext.Provider>
+
