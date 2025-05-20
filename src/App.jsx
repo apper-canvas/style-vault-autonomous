@@ -54,16 +54,19 @@ const Header = ({ toggleDarkMode, darkMode }) => {
           {/* Logo */}
           <a href="/" className="text-2xl font-bold flex items-center gap-2">
             <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 100 100" 
-              width="40" 
-              height="40" 
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 100 100"
+              width="40"
+              height="40"
               className="text-primary"
             >
-              <rect width="100" height="100" rx="20" fill="currentColor" fillOpacity="0.1" />
-              <path d="M35,30 C35,30 40,30 45,30 C50,30 55,35 55,40 C55,45 50,50 45,50 L35,50 Z" fill="currentColor" />
-              <path d="M35,50 L45,50 C50,50 55,55 55,60 C55,65 50,70 45,70 L35,70 Z" fill="currentColor" />
-              <path d="M60,30 L60,70 L65,70 C70,70 75,65 75,60 L75,40 C75,35 70,30 65,30 Z" fill="currentColor" />
+              <rect width="100" height="100" rx="15" fill="currentColor" fillOpacity="0.1" />
+              <path d="M25,30 L75,30 C80,30 85,35 85,40 L85,70 C85,75 80,80 75,80 L25,80 C20,80 15,75 15,70 L15,40 C15,35 20,30 25,30 Z" fill="none" stroke="currentColor" strokeWidth="4" />
+              <circle cx="50" cy="38" r="4" fill="currentColor" />
+              <path d="M50,38 L50,45" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              <path d="M30,45 L70,45" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              <path d="M35,45 L40,75 M65,45 L60,75" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              <path d="M40,75 L60,75" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
             </svg>
             <span className="text-surface-800 dark:text-surface-100">
               StyleVault
@@ -211,15 +214,19 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 100 100" 
-                width="32" 
-                height="32" 
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 100 100"
+                width="32"
+                height="32"
                 className="text-primary"
               >
-                <path d="M35,30 C35,30 40,30 45,30 C50,30 55,35 55,40 C55,45 50,50 45,50 L35,50 Z" fill="currentColor" />
-                <path d="M35,50 L45,50 C50,50 55,55 55,60 C55,65 50,70 45,70 L35,70 Z" fill="currentColor" />
-                <path d="M60,30 L60,70 L65,70 C70,70 75,65 75,60 L75,40 C75,35 70,30 65,30 Z" fill="currentColor" />
+                <rect width="100" height="100" rx="15" fill="currentColor" fillOpacity="0.1" />
+                <path d="M25,30 L75,30 C80,30 85,35 85,40 L85,70 C85,75 80,80 75,80 L25,80 C20,80 15,75 15,70 L15,40 C15,35 20,30 25,30 Z" fill="none" stroke="currentColor" strokeWidth="4" />
+                <circle cx="50" cy="38" r="4" fill="currentColor" />
+                <path d="M50,38 L50,45" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                <path d="M30,45 L70,45" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                <path d="M35,45 L40,75 M65,45 L60,75" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                <path d="M40,75 L60,75" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
               </svg>
               <h3 className="text-xl font-bold">StyleVault</h3>
             </div>
