@@ -1,14 +1,21 @@
-import { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, createContext } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser, clearUser } from './store/userSlice';
 import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
 import Collections from './pages/Collections';
 import WomenProducts from './pages/WomenProducts';
 import NotFound from './pages/NotFound';
 import SearchResults from './pages/SearchResults';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Callback from './pages/Callback';
+import ErrorPage from './pages/ErrorPage';
 import SearchBar from './components/SearchBar';
 import { SearchProvider } from './context/SearchContext';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Header component
 const Header = ({ toggleDarkMode, darkMode }) => {
@@ -17,7 +24,13 @@ const Header = ({ toggleDarkMode, darkMode }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [cart, setCart] = useState([]);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Get user data from Redux
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const { logout } = useContext(AuthContext);
+
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileRef = useRef(null);
   // Get icons as components
@@ -33,7 +46,47 @@ const Header = ({ toggleDarkMode, darkMode }) => {
   const LogOutIcon = getIcon('log-out');
   const PhoneIcon = getIcon('phone');
   
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const [cartItemCount, setCartItemCount] = useState(0);
+
+  // Fetch cart data when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    async function fetchCartData() {
+      try {
+        setIsLoading(true);
+        const { ApperClient } = window.ApperSDK;
+        const apperClient = new ApperClient({
+          apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+          apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+        });
+        
+        // Fetch cart data for the authenticated user
+        const response = await apperClient.fetchRecords('cart', {
+          where: [{ fieldName: 'user', operator: 'ExactMatch', values: [user.id] }]
+        });
+        
+        if (response && response.data && response.data.length > 0) {
+          // Get cart items for the user's cart
+          const cartId = response.data[0].Id;
+          const cartItemsResponse = await apperClient.fetchRecords('cart_item1', {
+            where: [{ fieldName: 'cart', operator: 'ExactMatch', values: [cartId] }]
+          });
+          
+          if (cartItemsResponse && cartItemsResponse.data) {
+            setCart(cartItemsResponse.data);
+            setCartItemCount(cartItemsResponse.data.reduce((total, item) => total + item.quantity, 0));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching cart:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchCartData();
+  }, [isAuthenticated, user]);
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -111,8 +164,8 @@ const Header = ({ toggleDarkMode, darkMode }) => {
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-surface-800 rounded-lg shadow-lg py-1 z-50 border border-surface-200 dark:border-surface-700">
                     <div className="px-4 py-2 border-b border-surface-200 dark:border-surface-700">
-                      <p className="text-sm font-medium text-surface-900 dark:text-white">My Account</p>
-                      <p className="text-xs text-surface-500 dark:text-surface-400">user@example.com</p>
+                      <p className="text-sm font-medium text-surface-900 dark:text-white">{isAuthenticated ? `${user.firstName || ''} ${user.lastName || ''}` : 'My Account'}</p>
+                      <p className="text-xs text-surface-500 dark:text-surface-400">{isAuthenticated ? user.email : 'Not logged in'}</p>
                     </div>
                     <a href="#" className="flex items-center px-4 py-2 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700">
                       <SettingsIcon size={16} className="mr-2" />
@@ -122,19 +175,35 @@ const Header = ({ toggleDarkMode, darkMode }) => {
                       <PhoneIcon size={16} className="mr-2" />
                       Contact
                     </a>
-                    <div className="border-t border-surface-200 dark:border-surface-700 my-1"></div>
-                    <button 
-                      className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-700"
-                      onClick={() => {
-                        // Handle logout logic here
-                        setIsProfileMenuOpen(false);
-                        // For example: authService.logout();
-                        // navigate('/login');
-                      }}
-                    >
+                    {isAuthenticated ? (
+                      <>
+                        <div className="border-t border-surface-200 dark:border-surface-700 my-1"></div>
+                        <button 
+                          className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-700"
+                          onClick={() => {
+                            setIsProfileMenuOpen(false);
+                            logout();
+                          }}
+                        >
+                          <LogOutIcon size={16} className="mr-2" />
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="border-t border-surface-200 dark:border-surface-700 my-1"></div>
+                        <button 
+                          className="flex w-full items-center px-4 py-2 text-sm text-primary dark:text-primary-light hover:bg-surface-100 dark:hover:bg-surface-700"
+                          onClick={() => {
+                            setIsProfileMenuOpen(false);
+                            navigate('/login');
+                          }}
+                        >
                       <LogOutIcon size={16} className="mr-2" />
-                      Logout
-                    </button>
+                          Login
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -281,8 +350,9 @@ const Footer = () => {
               <button type="submit" className="btn btn-primary">Subscribe</button>
             </form>
           </div>
+                  id="newsletter-email"
         </div>
-        
+                  placeholder="Your email address"
         <div className="border-t border-surface-800 mt-10 pt-6 text-center text-surface-400 text-sm">
           <p>&copy; {new Date().getFullYear()} StyleVault. All rights reserved.</p>
         </div>
@@ -299,9 +369,13 @@ function App() {
     const isDark = localStorage.getItem('darkMode') === 'true' || 
                   (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     
+// Create authentication context
+export const AuthContext = createContext(null);
+
     if (isDark) {
       document.documentElement.classList.add('dark');
-      setDarkMode(true);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
     }
   }, []);
   
@@ -325,31 +399,136 @@ function App() {
         
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/collections" element={<Collections />} />
-            <Route path="/women" element={<WomenProducts />} />
-            <Route path="/search" element={<SearchResults />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-      
-      <Footer />
-      
-      <ToastContainer
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme={darkMode ? "dark" : "light"}
-      />
-      </SearchProvider>
-    </div>
-  );
+  // Initialize authentication
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize ApperUI for authentication
+  useEffect(() => {
+    const { ApperClient, ApperUI } = window.ApperSDK;
+    const client = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+
+    // Initialize but don't show login yet
+    ApperUI.setup(client, {
+      target: '#authentication',
+      clientId: import.meta.env.VITE_APPER_PROJECT_ID,
+      view: 'both',
+      onSuccess: function (user) {
+        setIsInitialized(true);
+        // CRITICAL: This exact currentPath logic must be preserved in all implementations
+        // DO NOT simplify or modify this pattern as it ensures proper redirection flow
+        let currentPath = window.location.pathname + window.location.search;
+        let redirectPath = new URLSearchParams(window.location.search).get('redirect');
+        const isAuthPage = currentPath.includes('/login') || currentPath.includes('/signup') || currentPath.includes(
+            '/callback') || currentPath.includes('/error');
+        if (user) {
+          // User is authenticated
+          if (redirectPath) {
+            navigate(redirectPath);
+          } else if (!isAuthPage) {
+            if (!currentPath.includes('/login') && !currentPath.includes('/signup')) {
+              navigate(currentPath);
+            } else {
+              navigate('/');
+            }
+          } else {
+            navigate('/');
+          }
+          // Store user information in Redux
+          dispatch(setUser(JSON.parse(JSON.stringify(user))));
+        } else {
+          // User is not authenticated
+          if (!isAuthPage) {
+            navigate(
+              currentPath.includes('/signup')
+               ? `/signup?redirect=${currentPath}`
+               : currentPath.includes('/login')
+               ? `/login?redirect=${currentPath}`
+               : '/login');
+          } else if (redirectPath) {
+            if (
+              ![
+                'error',
+                'signup',
+                'login',
+                'callback'
+              ].some((path) => currentPath.includes(path)))
+              navigate(`/login?redirect=${redirectPath}`);
+            else {
+              navigate(currentPath);
+            }
+          } else if (isAuthPage) {
+            navigate(currentPath);
+          } else {
+            navigate('/login');
+          }
+          dispatch(clearUser());
+        }
+      },
+      onError: function(error) {
+        console.error("Authentication failed:", error);
+      }
+    });
+  }, [dispatch, navigate]);
+
+  // Authentication methods to share via context
+  const authMethods = {
+    isInitialized,
+    logout: async () => {
+      try {
+        const { ApperUI } = window.ApperSDK;
+        await ApperUI.logout();
+        dispatch(clearUser());
+        navigate('/login');
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    }
+  };
+
+  // Don't render routes until initialization is complete
+  if (!isInitialized) {
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mb-4 mx-auto"></div>
+        <p className="text-lg text-surface-600 dark:text-surface-400">Initializing application...</p>
+      </div>
+    </div>;
+  }
+
+  return (
+    <AuthContext.Provider value={authMethods}>
+      <div className="flex flex-col min-h-screen">
+        <SearchProvider>
+          <Header toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+          
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/collections" element={<Collections />} />
+              <Route path="/women" element={<WomenProducts />} />
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/callback" element={<Callback />} />
+              <Route path="/error" element={<ErrorPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+          
+          <Footer />
+          
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
 }
 
 export default App;
+    </AuthContext.Provider>

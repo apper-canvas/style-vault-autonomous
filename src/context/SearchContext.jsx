@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { initialProducts } from '../data/products';
+import { searchProducts } from '../services/productService';
+import { toast } from 'react-toastify';
 
 const SearchContext = createContext();
 
@@ -16,16 +17,18 @@ export const SearchProvider = ({ children }) => {
     if (!query.trim()) {
       setSearchResults([]);
       return;
-    }
-    
-    setIsSearching(true);
-    
-    // Using setTimeout to simulate API call
-    setTimeout(() => {
-      const normalizedQuery = query.toLowerCase().trim();
+
+    // Use the product service to search
+    searchProducts(query)
+      .then(results => {
       
       const results = initialProducts.filter(product => {
-        const nameMatch = product.name.toLowerCase().includes(normalizedQuery);
+      })
+      .catch(error => {
+        console.error('Search error:', error);
+        toast.error('Search failed. Please try again.');
+        setIsSearching(false);
+      });
         const descriptionMatch = product.description.toLowerCase().includes(normalizedQuery);
         const categoryMatch = product.category.toLowerCase().includes(normalizedQuery);
         const subcategoryMatch = product.subcategory.toLowerCase().includes(normalizedQuery);

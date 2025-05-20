@@ -1,108 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { getIcon } from '../utils/iconUtils';
 import { toast } from 'react-toastify';
-
-// Sample women's products data
-const womenProducts = [
-  {
-    id: 1,
-    name: "Elegant Floral Summer Dress",
-    category: "clothing",
-    price: 89.99,
-    image: "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.8,
-    reviews: 127,
-    description: "A beautiful floral summer dress with a flowy silhouette, perfect for warm days and special occasions.",
-    colors: ["Pink", "Blue", "White"],
-    sizes: ["XS", "S", "M", "L", "XL"]
-  },
-  {
-    id: 2,
-    name: "High-Waisted Slim Fit Jeans",
-    category: "clothing",
-    price: 69.99,
-    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.5,
-    reviews: 214,
-    description: "Classic high-waisted jeans with a slim fit design, offering both comfort and style for everyday wear.",
-    colors: ["Blue", "Black", "Light Blue"],
-    sizes: ["24", "25", "26", "27", "28", "29", "30", "31", "32"]
-  },
-  {
-    id: 3,
-    name: "Oversized Knit Sweater",
-    category: "clothing",
-    price: 59.99,
-    image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.6,
-    reviews: 89,
-    description: "A cozy oversized knit sweater that provides warmth and comfort without sacrificing style.",
-    colors: ["Cream", "Gray", "Burgundy"],
-    sizes: ["S", "M", "L"]
-  },
-  {
-    id: 4,
-    name: "Tailored Blazer",
-    category: "clothing",
-    price: 129.99,
-    image: "https://images.unsplash.com/photo-1591085686350-798c0f9faa7f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.9,
-    reviews: 76,
-    description: "A sophisticated tailored blazer that adds a touch of professionalism to any outfit.",
-    colors: ["Black", "Navy", "Beige"],
-    sizes: ["XS", "S", "M", "L", "XL"]
-  },
-  {
-    id: 5,
-    name: "Vintage Leather Watch",
-    category: "watches",
-    price: 149.99,
-    image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.7,
-    reviews: 58,
-    description: "A timeless vintage-inspired leather watch that adds sophistication to any outfit.",
-    colors: ["Brown", "Black"],
-    features: ["Water Resistant", "Genuine Leather"]
-  },
-  {
-    id: 6,
-    name: "Minimalist Gold Watch",
-    category: "watches",
-    price: 199.99,
-    image: "https://images.unsplash.com/photo-1609587312208-cea54be969e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.8,
-    reviews: 92,
-    description: "An elegant minimalist gold watch with a sleek design, perfect for everyday wear.",
-    colors: ["Gold", "Rose Gold", "Silver"],
-    features: ["Sapphire Glass", "Japanese Movement"]
-  },
-  {
-    id: 7,
-    name: "Silk Button-Up Blouse",
-    category: "clothing",
-    price: 79.99,
-    image: "https://images.unsplash.com/photo-1603217192634-61068e4d4bf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.4,
-    reviews: 103,
-    description: "A luxurious silk button-up blouse that transitions perfectly from office to evening events.",
-    colors: ["White", "Black", "Blush Pink"],
-    sizes: ["XS", "S", "M", "L", "XL"]
-  },
-  {
-    id: 8,
-    name: "Digital Smart Watch",
-    category: "watches",
-    price: 249.99,
-    image: "https://images.unsplash.com/photo-1617043786394-ae546b6c4b04?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    rating: 4.9,
-    reviews: 217,
-    description: "A feature-packed smart watch that helps you stay connected and track your fitness goals.",
-    colors: ["Black", "White", "Pink"],
-    features: ["Heart Rate Monitor", "Sleep Tracking", "Water Resistant"]
-  }
-];
+import { fetchProducts } from '../services/productService';
+import { addToCart } from '../services/cartService';
+import { addToWishlist, isInWishlist } from '../services/wishlistService';
 
 const ProductCard = ({ product, onAddToCart }) => {
   const StarIcon = getIcon('star');
@@ -168,20 +72,39 @@ const ProductCard = ({ product, onAddToCart }) => {
 };
 
 const WomenProducts = () => {
+  const { isAuthenticated, user } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 300]);
   const [sortBy, setSortBy] = useState('recommended');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   const FilterIcon = getIcon('filter');
   const ArrowLeftIcon = getIcon('arrow-left');
   
-  // Initialize products on component mount
   useEffect(() => {
-    setProducts(womenProducts);
-    setFilteredProducts(womenProducts);
+    setLoading(true);
+    // Fetch women's products
+    fetchProducts({ category: 'Women' })
+      .then(data => {
+        setProducts(data);
+        setFilteredProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching products:', err);
+        setError('Failed to load products. Please try again.');
+        setLoading(false);
+        toast.error('Failed to load products');
+      });
+  }, []);
+  
+  // When sort or filter changes, update filtered products
+  useEffect(() => {
+    if (products.length === 0) return;
   }, []);
   
   // Handle filtering and sorting
@@ -211,9 +134,24 @@ const WomenProducts = () => {
   }, [activeCategory, priceRange, sortBy, products]);
   
   const handleAddToCart = (product) => {
-    // Here you would typically dispatch to a cart state
-    console.log('Added to cart:', product);
-    // Toast notification handled in the ProductCard component
+    // Add to cart
+    if (isAuthenticated && user) {
+      addToCart(user.id, product.Id, 1)
+        .then(() => {
+          toast.success(`${product.Name} added to your cart!`);
+        })
+        .catch(error => {
+          console.error('Error adding to cart:', error);
+          toast.error('Could not add to cart. Please try again.');
+        });
+    } else {
+      // Just show the toast for anonymous users
+      toast.success(`${product.Name} added to cart!`);
+      // Optionally redirect to login
+      setTimeout(() => {
+        navigate('/login?redirect=/women');
+      }, 1500);
+    }
   };
   
   return (
@@ -288,11 +226,55 @@ const WomenProducts = () => {
           
           {/* Products Grid */}
           <div className="lg:w-3/4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+              </div>
+            ) : error ? (
+              <div className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-4 rounded-lg my-6">
+                <p>{error}</p>
+                <button
+                  onClick={() => {
+                    setLoading(true);
+                    setError(null);
+                    fetchProducts({ category: 'Women' })
+                      .then(data => {
+                        setProducts(data);
+                        setFilteredProducts(data);
+                        setLoading(false);
+                      })
+                      .catch(err => {
+                        setError('Failed to load products. Please try again.');
+                        setLoading(false);
+                      });
+                  }}
+                  className="text-sm underline mt-2"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map(product => (
+                  <ProductCard key={product.Id} product={product} onAddToCart={handleAddToCart} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-xl mb-4">No products found</p>
+                <p className="text-surface-600 dark:text-surface-400 mb-6">Try adjusting your filters to find what you're looking for.</p>
+                <button
+                  onClick={() => {
+                    setActiveCategory('all');
+                    setPriceRange([0, 300]);
+                    setSortBy('recommended');
+                  }}
+                  className="btn btn-primary"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

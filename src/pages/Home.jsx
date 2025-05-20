@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
-import { initialProducts } from '../data/products';
+import { fetchProducts } from '../services/productService';
+import { fetchCategories } from '../services/categoryService';
+import { addToCart } from '../services/cartService';
 import MainFeature from '../components/MainFeature';
 
 // Product component
@@ -137,18 +140,29 @@ const CategorySection = () => {
   const categories = [
     {
       name: "Women",
-      image: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
     },
     {
       name: "Men",
-      image: "https://images.unsplash.com/photo-1536766820879-059fec98ec0a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1536766820879-059fec98ec0a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
     },
     {
       name: "Accessories",
-      image: "https://images.unsplash.com/photo-1576053139778-7e32f2ae3cfd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1576053139778-7e32f2ae3cfd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
     }
   ];
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [categoryData, setCategoryData] = useState(categories);
   
+  useEffect(() => {
+    // Fetch categories from service
+    fetchCategories()
+      .then(data => data.length > 0 && setCategoryData(data))
+      .catch(error => console.error('Error loading categories:', error))
+      .finally(() => setIsLoading(false));
+  }, []);
+
   return (
     <section className="py-16 bg-surface-100 dark:bg-surface-800/50">
       <div className="container mx-auto px-4">
@@ -160,8 +174,8 @@ const CategorySection = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {categories.map((category, index) => (
-            <motion.div 
+          {categoryData.map((category, index) => (
+            <motion.div
               key={index}
               className="relative rounded-xl overflow-hidden aspect-[3/4] group cursor-pointer"
               initial={{ opacity: 0, y: 20 }}
@@ -197,13 +211,16 @@ const CategorySection = () => {
 
 // Main Home component
 const Home = () => {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
   const [visibleProducts, setVisibleProducts] = useState(8);
+  const [error, setError] = useState(null);
   
-  // Add to cart functionality
+  // Get user from Redux
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  
   const addToCart = (product) => {
     const existingItem = cart.find(item => item.id === product.id);
     
@@ -219,7 +236,28 @@ const Home = () => {
     }
     
     toast.success(`${product.name} added to cart!`);
+    
+    // Add to cart in database if authenticated
+    if (isAuthenticated && user) {
+      addToCart(user.id, product.id, 1)
+        .then(() => {
+          toast.success('Item added to your cart!');
+        })
+        .catch(error => {
+          console.error('Error adding to cart:', error);
+          toast.error('Could not add to cart. Please try again.');
+        });
+    }
   };
+  
+  // Load products on component mount
+  useEffect(() => {
+    setLoading(true);
+    fetchProducts({ featured: true, limit: 8 })
+      .then(data => setProducts(data))
+      .catch(err => setError('Failed to load products. Please try again.'))
+      .finally(() => setLoading(false));
+  }, []);
   
   // Filter products by category
   const handleCategoryChange = (category) => {
@@ -232,10 +270,11 @@ const Home = () => {
   const loadMoreProducts = () => {
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setVisibleProducts(prev => prev + 4);
-      setLoading(false);
+    // Fetch more products
+    fetchProducts({ limit: 4, offset: visibleProducts })
+      .then(newProducts => {
+        setProducts(current => [...current, ...newProducts]);
+        setVisibleProducts(prev => prev + 4);
     }, 800);
   };
   
@@ -260,6 +299,31 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
             <div>
+              {loading && visibleProducts === 8 && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+                </div>
+              )}
+              
+              {error && (
+                <div className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-4 rounded-lg mb-6">
+                  <p>{error}</p>
+                  <button 
+                    onClick={() => {
+                      setError(null);
+                      setLoading(true);
+                      fetchProducts({ featured: true, limit: 8 })
+                        .then(data => setProducts(data))
+                        .catch(err => setError('Failed to load products. Please try again.'))
+                        .finally(() => setLoading(false));
+                    }}
+                    className="text-sm underline mt-2"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+              
               <h2 className="text-3xl font-bold mb-2">Featured Products</h2>
               <p className="text-surface-600 dark:text-surface-400">
                 Discover our carefully selected products for this season
@@ -283,7 +347,7 @@ const Home = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[400px]">
             {filteredProducts.slice(0, visibleProducts).map(product => (
               <ProductCard key={product.id} product={product} addToCart={addToCart} />
             ))}
@@ -316,12 +380,32 @@ const Home = () => {
               exclusive offers, and fashion tips.
             </p>
             <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-              <input 
+              <input
+                id="newsletter-email-hero"
                 type="email" 
                 placeholder="Your email address" 
                 className="flex-1 px-4 py-3 rounded-lg text-surface-900 focus:outline-none focus:ring-2 focus:ring-primary-light"
               />
-              <button type="submit" className="px-6 py-3 bg-white text-primary font-medium rounded-lg hover:bg-surface-100 transition-colors">
+              <button 
+                type="submit" 
+                className="px-6 py-3 bg-white text-primary font-medium rounded-lg hover:bg-surface-100 transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const email = document.getElementById('newsletter-email-hero').value;
+                  if (!email || !email.includes('@')) {
+                    toast.error('Please enter a valid email address');
+                    return;
+                  }
+                  
+                  import('../services/newsletterService')
+                    .then(module => module.subscribeToNewsletter(email))
+                    .then(() => {
+                      toast.success('Thank you for subscribing to our newsletter!');
+                      document.getElementById('newsletter-email-hero').value = '';
+                    })
+                    .catch(error => toast.error('Failed to subscribe. Please try again.'));
+                }}
+              >
                 Subscribe
               </button>
             </form>

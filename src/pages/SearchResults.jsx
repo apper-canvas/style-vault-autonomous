@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useSearch } from '../context/SearchContext';
 import { getIcon } from '../utils/iconUtils';
 import { toast } from 'react-toastify';
@@ -8,7 +9,9 @@ const SearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { performSearch, searchResults, isSearching } = useSearch();
-  
+
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState('relevance');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -72,7 +75,22 @@ const SearchResults = () => {
   
   // Add to cart function
   const addToCart = (product) => {
-    toast.success(`${product.name} added to cart!`);
+    if (isAuthenticated && user) {
+      import('../services/cartService')
+        .then(module => module.addToCart(user.id, product.Id, 1))
+        .then(() => {
+          toast.success(`${product.Name} added to your cart!`);
+        })
+        .catch(error => {
+          console.error('Error adding to cart:', error);
+          toast.error('Could not add to cart. Please try again.');
+        });
+    } else {
+      // Just show the toast for anonymous users
+      toast.success(`${product.Name} added to cart!`);
+      // Optionally redirect to login
+      navigate('/login?redirect=/search?q=' + encodeURIComponent(query));
+    }
   };
   
   return (
@@ -165,61 +183,73 @@ const SearchResults = () => {
         </div>
       ) : filteredResults.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredResults.map(product => (
-            <div key={product.id} className="card card-hover group cursor-pointer">
+          {filteredResults.map((product) => (
+            <div key={product.Id} className="card card-hover group cursor-pointer">
               <div className="relative overflow-hidden">
                 <img 
                   src={product.image} 
-                  alt={product.name} 
+                  alt={product.Name} 
                   className="w-full h-64 object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                  onError={(e) => { e.target.src = `https://placehold.co/800x600/F3F4F6/6c757d?text=${encodeURIComponent(product.name)}`; }}
+                  onError={(e) => { e.target.src = `https://placehold.co/800x600/F3F4F6/6c757d?text=${encodeURIComponent(product.Name)}`; }}
                 />
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <div className="flex space-x-2">
                     <button 
                       onClick={() => addToCart(product)}
-                      className="p-3 bg-white/90 rounded-full text-surface-900 hover:bg-primary hover:text-white transition-colors"
+                      className="p-3 bg-white/90 rounded-full text-surface-900 hover:bg-primary hover:text-white transition-colors z-10"
                     >
                       <ShoppingBagIcon size={18} />
                     </button>
-                    <button className="p-3 bg-white/90 rounded-full text-surface-900 hover:bg-primary hover:text-white transition-colors">
+                    <button 
+                      className="p-3 bg-white/90 rounded-full text-surface-900 hover:bg-primary hover:text-white transition-colors z-10"
+                      onClick={() => {
+                        if (isAuthenticated && user) {
+                          import('../services/wishlistService')
+                            .then(module => module.addToWishlist(user.id, product.Id))
+                            .then(() => {
+                              toast.success(`${product.Name} added to your wishlist!`);
+                            })
+                            .catch(error => {
+                              console.error('Error adding to wishlist:', error);
+                              toast.error('Could not add to wishlist. Please try again.');
+                            });
+                        } else {
+                          toast.info('Please log in to add items to your wishlist');
+                          navigate('/login?redirect=/search?q=' + encodeURIComponent(query));
+                        }
+                      }}
+                    >
                       <HeartIcon size={18} />
                     </button>
                   </div>
                 </div>
                 
                 {product.salePrice && (
-                  <div className="absolute top-4 left-4 bg-secondary text-white text-xs font-bold px-2 py-1 rounded">
+                  <div className="absolute top-4 left-4 bg-secondary text-white text-xs font-bold px-2 py-1 rounded z-10">
                     SALE
                   </div>
                 )}
-              </div>
-              
+              </div>              
               <div className="p-4">
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-lg font-medium">{product.name}</h3>
+                  <h3 className="text-lg font-medium">{product.Name}</h3>
                   <div className="flex items-center">
                     <StarIcon size={16} className="text-accent" />
                     <span className="ml-1 text-sm">{product.averageRating}</span>
                   </div>
                 </div>
                 
-                <p className="text-surface-600 dark:text-surface-400 text-sm mb-3">{product.category} • {product.subcategory}</p>
+                <p className="text-surface-600 dark:text-surface-400 text-sm mb-3">{product.category || 'Uncategorized'}</p>
                 
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
-                    {product.salePrice ? (
-                      <>
-                        <span className="text-secondary font-semibold">${product.salePrice.toFixed(2)}</span>
-                        <span className="ml-2 text-surface-500 line-through text-sm">${product.price.toFixed(2)}</span>
-                      </>
-                    ) : (
-                      <span className="font-semibold">${product.price.toFixed(2)}</span>
-                    )}
+                    <span className="font-semibold">${parseFloat(product.price || 0).toFixed(2)}</span>
                   </div>
-                  <div className="text-xs text-surface-500">
-                    {product.inventory < 10 ? `Only ${product.inventory} left` : "In Stock"}
-                  </div>
+                  {product.inventory && (
+                    <div className="text-xs text-surface-500">
+                      {product.inventory < 10 ? `Only ${product.inventory} left` : "In Stock"}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
