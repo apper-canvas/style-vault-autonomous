@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import { getIcon } from './utils/iconUtils';
 import Home from './pages/Home';
 import Collections from './pages/Collections';
+import WomenProducts from './pages/WomenProducts';
 import NotFound from './pages/NotFound';
 
 // Header component
@@ -38,7 +39,7 @@ const Header = ({ toggleDarkMode, darkMode }) => {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Women</a>
+            <a href="/women" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Women</a>
             <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Men</a>
             <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Accessories</a>
             <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">New Arrivals</a>
@@ -91,7 +92,7 @@ const Header = ({ toggleDarkMode, darkMode }) => {
         {isMobileMenuOpen && (
           <div className="md:hidden pt-4 pb-3 border-t border-surface-200 dark:border-surface-800 mt-3">
             <nav className="flex flex-col space-y-4">
-              <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Women</a>
+              <a href="/women" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Women</a>
               <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Men</a>
               <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">Accessories</a>
               <a href="#" className="text-surface-800 dark:text-surface-100 hover:text-primary dark:hover:text-primary-light font-medium">New Arrivals</a>
@@ -137,7 +138,7 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Shop</h4>
             <ul className="space-y-2 text-surface-300">
-              <li><a href="#" className="hover:text-white transition-colors">Women</a></li>
+              <li><a href="/women" className="hover:text-white transition-colors">Women</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Men</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Accessories</a></li>
               <li><a href="#" className="hover:text-white transition-colors">New Arrivals</a></li>
@@ -213,6 +214,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/collections" element={<Collections />} />
+          <Route path="/women" element={<WomenProducts />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
