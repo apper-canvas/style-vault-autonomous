@@ -70,7 +70,10 @@ const Header = ({ toggleDarkMode, darkMode }) => {
             <div className="flex items-center space-x-4">
               <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
                 <UserIcon size={20} />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-primary to-secondary rounded-full border border-white dark:border-surface-800"></div>
               </button>
+              
+              
               
             <button className="p-2 text-surface-700 dark:text-surface-300 hover:text-primary dark:hover:text-primary-light rounded-full">
               <HeartIcon size={20} />
